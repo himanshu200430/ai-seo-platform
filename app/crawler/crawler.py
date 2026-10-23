@@ -53,6 +53,7 @@ def crawl_site(
     fetch=fetch_page,
     robots: RobotsPolicy | None = None,
     sleep=time.sleep,
+    seed_urls: list[str] | None = None,
 ) -> CrawlResult:
     start, _ = urldefrag(start_url.strip())
     parsed_start = urlparse(start)
@@ -71,7 +72,12 @@ def crawl_site(
     pages: list[CrawledPage] = []
     skipped: list[str] = []
     linked_from: dict[str, set[str]] = {}
-
+    for extra in seed_urls or []:
+        extra, _ = urldefrag(extra)
+        if extra not in seen and urlparse(extra).netloc.lower() == host:
+            seen.add(extra)
+            queue.append(extra)
+       
     while queue and len(pages) < max_pages:
         url = queue.popleft()
 
